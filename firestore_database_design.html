@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Conception Base de Données Firestore — Gestion de Projets & Tâches</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --info: #0891b2;
+      --info-light: #ecfeff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #ffffff;
+      --bg-code: #f8fafc;
+      --bg-section: #f1f5f9;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 15mm 20mm;
+    }
+
+    @media print {
+      body {
+        padding: 10mm 15mm;
+        font-size: 10pt;
+      }
+
+      .page-break {
+        page-break-before: always;
+      }
+
+      .no-break {
+        page-break-inside: avoid;
+      }
+
+      h2 {
+        page-break-after: avoid;
+      }
+    }
+
+    h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 8px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      font-size: 13pt;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      font-weight: 400;
+    }
+
+    h2 {
+      font-size: 15pt;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 30px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    h2 .emoji {
+      margin-right: 6px;
+    }
+
+    h3 {
+      font-size: 12pt;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    h4 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 9.5pt;
+    }
+
+    thead th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 10px;
+    }
+
+    thead th:first-child {
+      border-radius: 6px 0 0 0;
+    }
+
+    thead th:last-child {
+      border-radius: 0 6px 0 0;
+    }
+
+    tbody td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--bg-section);
+    }
+
+    tbody tr:hover {
+      background: var(--primary-light);
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+      font-size: 9pt;
+      background: var(--bg-section);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--danger);
+    }
+
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 10px 0 16px 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 8.5pt;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    .keyword {
+      color: #c084fc;
+    }
+
+    .string {
+      color: #86efac;
+    }
+
+    .comment {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .function {
+      color: #93c5fd;
+    }
+
+    .type {
+      color: #fbbf24;
+    }
+
+    .number {
+      color: #fb923c;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+      border-left: 4px solid;
+      font-size: 9.5pt;
+    }
+
+    .alert-info {
+      background: var(--info-light);
+      border-color: var(--info);
+    }
+
+    .alert-info .alert-title {
+      color: var(--info);
+    }
+
+    .alert-warning {
+      background: var(--warning-light);
+      border-color: var(--warning);
+    }
+
+    .alert-warning .alert-title {
+      color: var(--warning);
+    }
+
+    .alert-success {
+      background: var(--success-light);
+      border-color: var(--success);
+    }
+
+    .alert-success .alert-title {
+      color: var(--success);
+    }
+
+    .alert-danger {
+      background: var(--danger-light);
+      border-color: var(--danger);
+    }
+
+    .alert-danger .alert-title {
+      color: var(--danger);
+    }
+
+    .alert-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 10pt;
+    }
+
+    .collection-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 9pt;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .path-badge {
+      display: inline-block;
+      background: var(--bg-section);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 8.5pt;
+      margin: 4px 0 8px 0;
+    }
+
+    .diagram-box {
+      background: var(--bg-section);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 14px 0;
+      text-align: center;
+    }
+
+    .entity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .entity-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .entity-card:hover {
+      border-color: var(--primary);
+    }
+
+    .entity-card .icon {
+      font-size: 24pt;
+      margin-bottom: 6px;
+    }
+
+    .entity-card .name {
+      font-weight: 700;
+      font-size: 11pt;
+      color: var(--primary);
+    }
+
+    .entity-card .desc {
+      font-size: 8.5pt;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .relation-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .relation-list li {
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 9.5pt;
+    }
+
+    .relation-list li:last-child {
+      border-bottom: none;
+    }
+
+    .arrow {
+      color: var(--primary);
+      font-weight: 700;
+      margin: 0 6px;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 12px;
+      border-top: 2px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 9pt;
+    }
+
+    .toc {
+      background: var(--primary-light);
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin: 16px 0 24px 0;
+    }
+
+    .toc-title {
+      font-weight: 700;
+      font-size: 11pt;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .toc ol {
+      padding-left: 20px;
+      columns: 2;
+      column-gap: 30px;
+    }
+
+    .toc li {
+      padding: 2px 0;
+      font-size: 9.5pt;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 8pt;
+      font-weight: 600;
+    }
+
+    .tag-required {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .tag-optional {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+
+    .tag-auto {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 11pt;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+
+    .print-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    @media print {
+      .print-btn {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <button class="print-btn" onclick="window.print()">🖨️ Imprimer / Sauvegarder PDF</button>
+
+  <!-- ============ PAGE 1 : TITRE + VUE D'ENSEMBLE ============ -->
+  <h1>🗄️ Conception Base de Données Firestore</h1>
+  <p class="subtitle">Application de Gestion de Projets & Tâches Collaboratives — Flutter + Firebase</p>
+
+  <div class="toc">
+    <div class="toc-title">📑 Table des matières</div>
+    <ol>
+      <li>Vue d'ensemble de l'architecture</li>
+      <li>Collection <code>users</code></li>
+      <li>Collection <code>projects</code></li>
+      <li>Collection <code>tasks</code></li>
+      <li>Collection <code>notifications</code></li>
+      <li>Index composites nécessaires</li>
+      <li>Règles de sécurité Firestore</li>
+      <li>Requêtes fréquentes (Dart)</li>
+      <li>Décisions de conception</li>
+      <li>Différences avec le schéma actuel</li>
+      <li>Évolutions futures</li>
+    </ol>
+  </div>
+
+  <h2><span class="emoji">🏗️</span> 1. Vue d'ensemble de l'architecture</h2>
+
+  <div class="entity-grid">
+    <div class="entity-card">
+      <div class="icon">👤</div>
+      <div class="name">users</div>
+      <div class="desc">Profils &amp; rôles<br>ID = Auth UID</div>
+    </div>
+    <div class="entity-card">
+      <div class="icon">📁</div>
+      <div class="name">projects</div>
+      <div class="desc">Projets collaboratifs<br>Auto-ID</div>
+    </div>
+    <div class="entity-card">
+      <div class="icon">✅</div>
+      <div class="name">tasks</div>
+      <div class="desc">Tâches (racine)<br>Auto-ID</div>
+    </div>
+    <div class="entity-card">
+      <div class="icon">🔔</div>
+      <div class="name">notifications</div>
+      <div class="desc">Alertes utilisateur<br>Auto-ID</div>
+    </div>
+  </div>
+
+  <h3>Relations entre les entités</h3>
+  <div class="diagram-box">
+    <ul class="relation-list">
+      <li><strong>users</strong> <span class="arrow">1 ──→ N</span> <strong>projects</strong> &nbsp;(via
+        <code>createdBy</code>)</li>
+      <li><strong>users</strong> <span class="arrow">N ←──→ N</span> <strong>projects</strong> &nbsp;(via
+        <code>members[]</code>)</li>
+      <li><strong>users</strong> <span class="arrow">1 ──→ N</span> <strong>tasks</strong> &nbsp;(via
+        <code>assignedTo</code>)</li>
+      <li><strong>users</strong> <span class="arrow">1 ──→ N</span> <strong>tasks</strong> &nbsp;(via
+        <code>createdBy</code>)</li>
+      <li><strong>projects</strong> <span class="arrow">1 ──→ N</span> <strong>tasks</strong> &nbsp;(via
+        <code>projectId</code>)</li>
+      <li><strong>users</strong> <span class="arrow">1 ──→ N</span> <strong>notifications</strong> &nbsp;(via
+        <code>userId</code>)</li>
+    </ul>
+  </div>
+
+  <!-- ============ PAGE 2 : COLLECTION USERS ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">👤</span> 2. Collection <code>users</code></h2>
+
+  <div>
+    <span class="collection-badge">📁 Collection racine</span>
+    <div class="path-badge">/users/{userId}</div>
+  </div>
+  <p><strong>ID du document</strong> = Firebase Auth UID (pas d'auto-génération)</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Champ</th>
+        <th>Type</th>
+        <th>Requis</th>
+        <th>Défaut</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>email</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Email de l'utilisateur (unique)</td>
+      </tr>
+      <tr>
+        <td><code>displayName</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>null</code></td>
+        <td>Nom d'affichage depuis Firebase Auth</td>
+      </tr>
+      <tr>
+        <td><code>fullName</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>null</code></td>
+        <td>Nom complet saisi par l'utilisateur</td>
+      </tr>
+      <tr>
+        <td><code>photoUrl</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>null</code></td>
+        <td>URL de la photo de profil</td>
+      </tr>
+      <tr>
+        <td><code>role</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td><code>"member"</code></td>
+        <td><code>"admin"</code> ou <code>"member"</code></td>
+      </tr>
+      <tr>
+        <td><code>createdAt</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>serverTimestamp()</code></td>
+        <td>Date de création du compte</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Exemple de document</h4>
+  <pre><code><span class="comment">// users/abc123</span>
+{
+  <span class="string">"email"</span>: <span class="string">"ahmed@example.com"</span>,
+  <span class="string">"displayName"</span>: <span class="string">"Ahmed"</span>,
+  <span class="string">"fullName"</span>: <span class="string">"Ahmed Ben Ali"</span>,
+  <span class="string">"photoUrl"</span>: <span class="string">"https://..."</span>,
+  <span class="string">"role"</span>: <span class="string">"member"</span>,
+  <span class="string">"createdAt"</span>: <span class="string">"2026-04-01T14:00:00Z"</span>
+}</code></pre>
+
+  <div class="alert alert-danger no-break">
+    <div class="alert-title">⚠️ Important — Sécurité du rôle</div>
+    Le champ <code>role</code> ne doit <strong>jamais</strong> être modifiable depuis le client. Seul un admin peut le
+    changer via la console Firebase ou une Cloud Function sécurisée.
+  </div>
+
+  <!-- ============ PAGE 3 : COLLECTION PROJECTS ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">📁</span> 3. Collection <code>projects</code></h2>
+
+  <div>
+    <span class="collection-badge">📁 Collection racine</span>
+    <div class="path-badge">/projects/{projectId}</div>
+  </div>
+  <p><strong>ID du document</strong> = auto-généré par Firestore</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Champ</th>
+        <th>Type</th>
+        <th>Requis</th>
+        <th>Défaut</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>name</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Nom du projet</td>
+      </tr>
+      <tr>
+        <td><code>description</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>""</code></td>
+        <td>Description du projet</td>
+      </tr>
+      <tr>
+        <td><code>deadline</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Date limite du projet</td>
+      </tr>
+      <tr>
+        <td><code>members</code></td>
+        <td><code>array&lt;string&gt;</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td><code>[]</code></td>
+        <td>Liste des UIDs des membres</td>
+      </tr>
+      <tr>
+        <td><code>createdBy</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>UID du créateur</td>
+      </tr>
+      <tr>
+        <td><code>status</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td><code>"en_cours"</code></td>
+        <td><code>"en_cours"</code> | <code>"termine"</code> | <code>"en_pause"</code></td>
+      </tr>
+      <tr>
+        <td><code>completionPercentage</code></td>
+        <td><code>number</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>0</code></td>
+        <td>Calculé : (tâches done ÷ total) × 100</td>
+      </tr>
+      <tr>
+        <td><code>createdAt</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>serverTimestamp()</code></td>
+        <td>Date de création</td>
+      </tr>
+      <tr>
+        <td><code>updatedAt</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>serverTimestamp()</code></td>
+        <td>Dernière modification</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Exemple de document</h4>
+  <pre><code><span class="comment">// projects/proj001</span>
+{
+  <span class="string">"name"</span>: <span class="string">"Application Mobile v2"</span>,
+  <span class="string">"description"</span>: <span class="string">"Refonte de l'application mobile"</span>,
+  <span class="string">"deadline"</span>: <span class="string">"2026-06-15T00:00:00Z"</span>,
+  <span class="string">"members"</span>: [<span class="string">"uid_ahmed"</span>, <span class="string">"uid_sara"</span>, <span class="string">"uid_khalil"</span>],
+  <span class="string">"createdBy"</span>: <span class="string">"uid_ahmed"</span>,
+  <span class="string">"status"</span>: <span class="string">"en_cours"</span>,
+  <span class="string">"completionPercentage"</span>: <span class="number">45</span>,
+  <span class="string">"createdAt"</span>: <span class="string">"2026-04-01T10:00:00Z"</span>,
+  <span class="string">"updatedAt"</span>: <span class="string">"2026-04-01T14:30:00Z"</span>
+}</code></pre>
+
+  <div class="alert alert-info no-break">
+    <div class="alert-title">ℹ️ Pourquoi <code>members</code> est un tableau et non une sous-collection ?</div>
+    Avec 50-100 utilisateurs max, un tableau est plus performant : une seule lecture pour obtenir tous les membres, et
+    Firestore supporte <code>arrayContains</code> pour les requêtes de filtrage. Une sous-collection serait préférable
+    au-delà de ~500 membres.
+  </div>
+
+  <!-- ============ PAGE 4 : COLLECTION TASKS ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">✅</span> 4. Collection <code>tasks</code></h2>
+
+  <div>
+    <span class="collection-badge">📁 Collection racine</span>
+    <div class="path-badge">/tasks/{taskId}</div>
+  </div>
+  <p><strong>ID du document</strong> = auto-généré par Firestore</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Champ</th>
+        <th>Type</th>
+        <th>Requis</th>
+        <th>Défaut</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>title</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Titre de la tâche</td>
+      </tr>
+      <tr>
+        <td><code>description</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>""</code></td>
+        <td>Description détaillée</td>
+      </tr>
+      <tr>
+        <td><code>assignedTo</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>""</code></td>
+        <td>UID de la personne assignée (vide = non assigné)</td>
+      </tr>
+      <tr>
+        <td><code>dueDate</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Date d'échéance</td>
+      </tr>
+      <tr>
+        <td><code>status</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td><code>"todo"</code></td>
+        <td><code>"todo"</code> | <code>"in_progress"</code> | <code>"done"</code></td>
+      </tr>
+      <tr>
+        <td><code>projectId</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>ID du projet parent</td>
+      </tr>
+      <tr>
+        <td><code>projectName</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Nom du projet (dénormalisé)</td>
+      </tr>
+      <tr>
+        <td><code>priority</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td><code>"medium"</code></td>
+        <td><code>"low"</code> | <code>"medium"</code> | <code>"high"</code></td>
+      </tr>
+      <tr>
+        <td><code>comments</code></td>
+        <td><code>array&lt;map&gt;</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>[]</code></td>
+        <td>Commentaires embarqués (voir structure ci-dessous)</td>
+      </tr>
+      <tr>
+        <td><code>createdBy</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>UID du créateur de la tâche</td>
+      </tr>
+      <tr>
+        <td><code>createdAt</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>serverTimestamp()</code></td>
+        <td>Date de création</td>
+      </tr>
+      <tr>
+        <td><code>updatedAt</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>serverTimestamp()</code></td>
+        <td>Dernière modification</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Structure d'un commentaire (embarqué dans <code>comments[]</code>)</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>Champ</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>id</code></td>
+        <td><code>string</code></td>
+        <td>UUID généré côté client</td>
+      </tr>
+      <tr>
+        <td><code>userId</code></td>
+        <td><code>string</code></td>
+        <td>UID de l'auteur</td>
+      </tr>
+      <tr>
+        <td><code>userName</code></td>
+        <td><code>string</code></td>
+        <td>Nom de l'auteur (dénormalisé)</td>
+      </tr>
+      <tr>
+        <td><code>text</code></td>
+        <td><code>string</code></td>
+        <td>Contenu du commentaire</td>
+      </tr>
+      <tr>
+        <td><code>createdAt</code></td>
+        <td><code>timestamp</code></td>
+        <td>Date du commentaire</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Exemple de document</h4>
+  <pre><code><span class="comment">// tasks/task001</span>
+{
+  <span class="string">"title"</span>: <span class="string">"Implémenter l'écran de login"</span>,
+  <span class="string">"description"</span>: <span class="string">"Créer la page de connexion avec validation"</span>,
+  <span class="string">"assignedTo"</span>: <span class="string">"uid_sara"</span>,
+  <span class="string">"dueDate"</span>: <span class="string">"2026-04-15T00:00:00Z"</span>,
+  <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+  <span class="string">"projectId"</span>: <span class="string">"proj001"</span>,
+  <span class="string">"projectName"</span>: <span class="string">"Application Mobile v2"</span>,
+  <span class="string">"priority"</span>: <span class="string">"high"</span>,
+  <span class="string">"comments"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"c1"</span>,
+      <span class="string">"userId"</span>: <span class="string">"uid_ahmed"</span>,
+      <span class="string">"userName"</span>: <span class="string">"Ahmed"</span>,
+      <span class="string">"text"</span>: <span class="string">"N'oublie pas la récupération du mot de passe"</span>,
+      <span class="string">"createdAt"</span>: <span class="string">"2026-04-02T09:00:00Z"</span>
+    }
+  ],
+  <span class="string">"createdBy"</span>: <span class="string">"uid_ahmed"</span>,
+  <span class="string">"createdAt"</span>: <span class="string">"2026-04-01T10:30:00Z"</span>,
+  <span class="string">"updatedAt"</span>: <span class="string">"2026-04-02T09:00:00Z"</span>
+}</code></pre>
+
+  <div class="alert alert-info no-break">
+    <div class="alert-title">ℹ️ Pourquoi les tâches sont une collection racine ?</div>
+    L'app doit afficher <strong>toutes les tâches d'un utilisateur</strong> (tous projets confondus) dans le Dashboard
+    et "My Tasks". Avec une sous-collection, il faudrait une requête par projet. Ici, une seule requête
+    <code>where('assignedTo', '==', userId)</code> suffit.
+  </div>
+
+  <div class="alert alert-info no-break">
+    <div class="alert-title">ℹ️ Pourquoi <code>projectName</code> est dénormalisé ?</div>
+    Évite de charger le document <code>project</code> à chaque affichage de tâche. Quand un projet est renommé, il faut
+    mettre à jour ce champ dans toutes ses tâches via un <strong>batch write</strong>.
+  </div>
+
+  <!-- ============ PAGE 5 : NOTIFICATIONS ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">🔔</span> 5. Collection <code>notifications</code></h2>
+
+  <div>
+    <span class="collection-badge">📁 Collection racine</span>
+    <div class="path-badge">/notifications/{notificationId}</div>
+  </div>
+  <p><strong>ID du document</strong> = auto-généré par Firestore</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Champ</th>
+        <th>Type</th>
+        <th>Requis</th>
+        <th>Défaut</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>userId</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>UID du destinataire</td>
+      </tr>
+      <tr>
+        <td><code>type</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Type de notification</td>
+      </tr>
+      <tr>
+        <td><code>title</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Titre de la notification</td>
+      </tr>
+      <tr>
+        <td><code>message</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td>—</td>
+        <td>Message descriptif</td>
+      </tr>
+      <tr>
+        <td><code>relatedTaskId</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>null</code></td>
+        <td>Lien vers la tâche concernée</td>
+      </tr>
+      <tr>
+        <td><code>relatedProjectId</code></td>
+        <td><code>string</code></td>
+        <td><span class="tag tag-optional">Optionnel</span></td>
+        <td><code>null</code></td>
+        <td>Lien vers le projet concerné</td>
+      </tr>
+      <tr>
+        <td><code>isRead</code></td>
+        <td><code>boolean</code></td>
+        <td><span class="tag tag-required">Requis</span></td>
+        <td><code>false</code></td>
+        <td>Marqueur de lecture</td>
+      </tr>
+      <tr>
+        <td><code>createdAt</code></td>
+        <td><code>timestamp</code></td>
+        <td><span class="tag tag-auto">Auto</span></td>
+        <td><code>serverTimestamp()</code></td>
+        <td>Date de création</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Types de notifications</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Déclencheur</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>task_assigned</code></td>
+        <td>Une tâche est assignée à l'utilisateur</td>
+      </tr>
+      <tr>
+        <td><code>task_due_soon</code></td>
+        <td>Échéance dans les prochaines 24h</td>
+      </tr>
+      <tr>
+        <td><code>task_overdue</code></td>
+        <td>Échéance dépassée</td>
+      </tr>
+      <tr>
+        <td><code>project_added</code></td>
+        <td>Ajouté comme membre d'un projet</td>
+      </tr>
+      <tr>
+        <td><code>task_completed</code></td>
+        <td>Une tâche du projet est terminée</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Exemple de document</h4>
+  <pre><code><span class="comment">// notifications/notif001</span>
+{
+  <span class="string">"userId"</span>: <span class="string">"uid_sara"</span>,
+  <span class="string">"type"</span>: <span class="string">"task_assigned"</span>,
+  <span class="string">"title"</span>: <span class="string">"Nouvelle tâche assignée"</span>,
+  <span class="string">"message"</span>: <span class="string">"Ahmed vous a assigné : Implémenter l'écran de login"</span>,
+  <span class="string">"relatedTaskId"</span>: <span class="string">"task001"</span>,
+  <span class="string">"relatedProjectId"</span>: <span class="string">"proj001"</span>,
+  <span class="string">"isRead"</span>: <span class="keyword">false</span>,
+  <span class="string">"createdAt"</span>: <span class="string">"2026-04-01T10:30:00Z"</span>
+}</code></pre>
+
+  <!-- ============ PAGE 6 : INDEX ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">📇</span> 6. Index composites nécessaires</h2>
+
+  <p>Firestore crée automatiquement les index simples. Les requêtes combinant plusieurs champs nécessitent des
+    <strong>index composites</strong> :</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Collection</th>
+        <th>Champs indexés</th>
+        <th>Cas d'usage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>tasks</code></td>
+        <td><code>assignedTo</code> ↑, <code>dueDate</code> ↑</td>
+        <td>Mes tâches triées par échéance</td>
+      </tr>
+      <tr>
+        <td><code>tasks</code></td>
+        <td><code>assignedTo</code> ↑, <code>status</code> ↑</td>
+        <td>Mes tâches filtrées par statut</td>
+      </tr>
+      <tr>
+        <td><code>tasks</code></td>
+        <td><code>projectId</code> ↑, <code>status</code> ↑</td>
+        <td>Tâches d'un projet par statut</td>
+      </tr>
+      <tr>
+        <td><code>tasks</code></td>
+        <td><code>projectId</code> ↑, <code>dueDate</code> ↑</td>
+        <td>Tâches d'un projet par échéance</td>
+      </tr>
+      <tr>
+        <td><code>tasks</code></td>
+        <td><code>assignedTo</code> ↑, <code>projectId</code> ↑, <code>status</code> ↑</td>
+        <td>Mes tâches sur un projet, par statut</td>
+      </tr>
+      <tr>
+        <td><code>notifications</code></td>
+        <td><code>userId</code> ↑, <code>isRead</code> ↑, <code>createdAt</code> ↓</td>
+        <td>Notifications non-lues, plus récentes d'abord</td>
+      </tr>
+      <tr>
+        <td><code>notifications</code></td>
+        <td><code>userId</code> ↑, <code>createdAt</code> ↓</td>
+        <td>Toutes les notifications, triées</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-success no-break">
+    <div class="alert-title">💡 Astuce</div>
+    Vous n'avez pas besoin de créer ces index manuellement. Firestore affichera un lien dans la console de débogage
+    Flutter quand une requête nécessite un index manquant. Cliquez dessus pour le créer automatiquement.
+  </div>
+
+  <!-- ============ PAGE 7 : RÈGLES DE SÉCURITÉ ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">🔒</span> 7. Règles de sécurité Firestore</h2>
+
+  <pre><code><span class="keyword">rules_version</span> = <span class="string">'2'</span>;
+<span class="keyword">service</span> cloud.firestore {
+  <span class="keyword">match</span> /databases/{database}/documents {
+
+    <span class="comment">// ─── Fonctions Helper ───</span>
+    <span class="keyword">function</span> <span class="function">isAuthenticated</span>() {
+      <span class="keyword">return</span> request.auth != <span class="keyword">null</span>;
+    }
+
+    <span class="keyword">function</span> <span class="function">isAdmin</span>() {
+      <span class="keyword">return</span> <span class="function">isAuthenticated</span>() &&
+        <span class="function">get</span>(/databases/$(database)/documents/users/
+          $(request.auth.uid)).data.role == <span class="string">'admin'</span>;
+    }
+
+    <span class="keyword">function</span> <span class="function">isOwner</span>(userId) {
+      <span class="keyword">return</span> <span class="function">isAuthenticated</span>() &&
+        request.auth.uid == userId;
+    }
+
+    <span class="comment">// ─── USERS ───</span>
+    <span class="keyword">match</span> /users/{userId} {
+      <span class="keyword">allow</span> read: <span class="keyword">if</span> <span class="function">isAuthenticated</span>();
+      <span class="keyword">allow</span> create: <span class="keyword">if</span> <span class="function">isOwner</span>(userId) &&
+        request.resource.data.role == <span class="string">'member'</span>;
+      <span class="keyword">allow</span> update: <span class="keyword">if</span> <span class="function">isOwner</span>(userId) &&
+        request.resource.data.role == resource.data.role;
+      <span class="keyword">allow</span> delete: <span class="keyword">if</span> <span class="function">isAdmin</span>();
+    }
+
+    <span class="comment">// ─── PROJECTS ───</span>
+    <span class="keyword">match</span> /projects/{projectId} {
+      <span class="keyword">allow</span> read: <span class="keyword">if</span> <span class="function">isAuthenticated</span>();
+      <span class="keyword">allow</span> create: <span class="keyword">if</span> <span class="function">isAdmin</span>();
+      <span class="keyword">allow</span> update: <span class="keyword">if</span> <span class="function">isAdmin</span>() ||
+        (<span class="function">isAuthenticated</span>() &&
+         request.auth.uid <span class="keyword">in</span> resource.data.members);
+      <span class="keyword">allow</span> delete: <span class="keyword">if</span> <span class="function">isAdmin</span>();
+    }
+
+    <span class="comment">// ─── TASKS ───</span>
+    <span class="keyword">match</span> /tasks/{taskId} {
+      <span class="keyword">allow</span> read: <span class="keyword">if</span> <span class="function">isAuthenticated</span>();
+      <span class="keyword">allow</span> create: <span class="keyword">if</span> <span class="function">isAdmin</span>() ||
+        (<span class="function">isAuthenticated</span>() &&
+         request.resource.data.createdBy == request.auth.uid);
+      <span class="keyword">allow</span> update: <span class="keyword">if</span> <span class="function">isAdmin</span>() ||
+        (<span class="function">isAuthenticated</span>() &&
+         (resource.data.assignedTo == request.auth.uid ||
+          resource.data.createdBy == request.auth.uid));
+      <span class="keyword">allow</span> delete: <span class="keyword">if</span> <span class="function">isAdmin</span>() ||
+        (<span class="function">isAuthenticated</span>() &&
+         resource.data.createdBy == request.auth.uid);
+    }
+
+    <span class="comment">// ─── NOTIFICATIONS ───</span>
+    <span class="keyword">match</span> /notifications/{notifId} {
+      <span class="keyword">allow</span> read: <span class="keyword">if</span> <span class="function">isAuthenticated</span>() &&
+        resource.data.userId == request.auth.uid;
+      <span class="keyword">allow</span> create: <span class="keyword">if</span> <span class="function">isAuthenticated</span>();
+      <span class="keyword">allow</span> update: <span class="keyword">if</span> <span class="function">isAuthenticated</span>() &&
+        resource.data.userId == request.auth.uid;
+      <span class="keyword">allow</span> delete: <span class="keyword">if</span> <span class="function">isAuthenticated</span>() &&
+        resource.data.userId == request.auth.uid;
+    }
+  }
+}</code></pre>
+
+  <!-- ============ PAGE 8 : REQUÊTES DART ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">🔍</span> 8. Requêtes fréquentes (Dart / Flutter)</h2>
+
+  <h4>Dashboard — Tâches de l'utilisateur connecté</h4>
+  <pre><code>_firestore.collection(<span class="string">'tasks'</span>)
+  .where(<span class="string">'assignedTo'</span>, isEqualTo: currentUserId)
+  .orderBy(<span class="string">'dueDate'</span>)
+  .snapshots();</code></pre>
+
+  <h4>Dashboard — Projets de l'utilisateur</h4>
+  <pre><code>_firestore.collection(<span class="string">'projects'</span>)
+  .where(<span class="string">'members'</span>, arrayContains: currentUserId)
+  .snapshots();</code></pre>
+
+  <h4>Tâches d'un projet spécifique</h4>
+  <pre><code>_firestore.collection(<span class="string">'tasks'</span>)
+  .where(<span class="string">'projectId'</span>, isEqualTo: projectId)
+  .orderBy(<span class="string">'status'</span>)
+  .snapshots();</code></pre>
+
+  <h4>Calcul automatique du <code>completionPercentage</code></h4>
+  <pre><code><span class="keyword">Future</span>&lt;<span class="type">void</span>&gt; <span class="function">updateProjectCompletion</span>(<span class="type">String</span> projectId) <span class="keyword">async</span> {
+  <span class="keyword">final</span> tasksSnapshot = <span class="keyword">await</span> _firestore
+    .collection(<span class="string">'tasks'</span>)
+    .where(<span class="string">'projectId'</span>, isEqualTo: projectId)
+    .get();
+
+  <span class="keyword">final</span> total = tasksSnapshot.docs.length;
+  <span class="keyword">final</span> done = tasksSnapshot.docs
+    .where((doc) => doc.data()[<span class="string">'status'</span>] == <span class="string">'done'</span>)
+    .length;
+
+  <span class="keyword">final</span> percentage = total > <span class="number">0</span>
+    ? ((done / total) * <span class="number">100</span>).round() : <span class="number">0</span>;
+
+  <span class="keyword">await</span> _firestore.collection(<span class="string">'projects'</span>)
+    .doc(projectId).update({
+      <span class="string">'completionPercentage'</span>: percentage,
+      <span class="string">'updatedAt'</span>: FieldValue.serverTimestamp(),
+    });
+}</code></pre>
+
+  <h4>Retirer un membre → désassigner ses tâches</h4>
+  <pre><code><span class="keyword">Future</span>&lt;<span class="type">void</span>&gt; <span class="function">removeMember</span>(<span class="type">String</span> projectId, <span class="type">String</span> userId) <span class="keyword">async</span> {
+  <span class="keyword">final</span> batch = _firestore.batch();
+
+  <span class="comment">// 1. Retirer de la liste members</span>
+  batch.update(_firestore.collection(<span class="string">'projects'</span>).doc(projectId), {
+    <span class="string">'members'</span>: FieldValue.arrayRemove([userId]),
+    <span class="string">'updatedAt'</span>: FieldValue.serverTimestamp(),
+  });
+
+  <span class="comment">// 2. Désassigner ses tâches</span>
+  <span class="keyword">final</span> tasks = <span class="keyword">await</span> _firestore.collection(<span class="string">'tasks'</span>)
+    .where(<span class="string">'projectId'</span>, isEqualTo: projectId)
+    .where(<span class="string">'assignedTo'</span>, isEqualTo: userId)
+    .get();
+
+  <span class="keyword">for</span> (<span class="keyword">final</span> doc <span class="keyword">in</span> tasks.docs) {
+    batch.update(doc.reference, {
+      <span class="string">'assignedTo'</span>: <span class="string">''</span>,
+      <span class="string">'updatedAt'</span>: FieldValue.serverTimestamp(),
+    });
+  }
+
+  <span class="keyword">await</span> batch.commit();
+}</code></pre>
+
+  <h4>Notifications non lues</h4>
+  <pre><code>_firestore.collection(<span class="string">'notifications'</span>)
+  .where(<span class="string">'userId'</span>, isEqualTo: currentUserId)
+  .where(<span class="string">'isRead'</span>, isEqualTo: <span class="keyword">false</span>)
+  .orderBy(<span class="string">'createdAt'</span>, descending: <span class="keyword">true</span>)
+  .snapshots();</code></pre>
+
+  <!-- ============ PAGE 9 : DÉCISIONS + DIFF + FUTUR ============ -->
+  <div class="page-break"></div>
+
+  <h2><span class="emoji">🧠</span> 9. Décisions de conception et justifications</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Décision</th>
+        <th>Justification</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tasks en collection racine</strong> (pas sous-collection de Projects)</td>
+        <td>Permet de requêter toutes les tâches d'un utilisateur tous projets confondus, sans collection group query
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Comments embarqués</strong> dans Tasks (array)</td>
+        <td>Peu de commentaires attendus, toujours lus avec la tâche → évite des lectures supplémentaires</td>
+      </tr>
+      <tr>
+        <td><strong><code>projectName</code> dénormalisé</strong> dans Tasks</td>
+        <td>Évite un <code>get()</code> sur le projet pour chaque tâche affichée en liste</td>
+      </tr>
+      <tr>
+        <td><strong><code>members</code> comme array</strong> dans Projects</td>
+        <td>Volumétrie faible (&lt;100 users), supporte <code>arrayContains</code> pour le filtrage</td>
+      </tr>
+      <tr>
+        <td><strong>Notifications en collection séparée</strong></td>
+        <td>Permet le tri, filtrage (lues/non-lues), et suppression sans affecter les tâches</td>
+      </tr>
+      <tr>
+        <td><strong><code>deadline</code> / <code>dueDate</code> comme Timestamp</strong></td>
+        <td>Meilleure précision et tri natif Firestore (vs string ISO)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-warning no-break">
+    <div class="alert-title">⚠️ Dénormalisation = responsabilité de synchronisation</div>
+    Quand un projet est renommé → mettre à jour <code>projectName</code> dans toutes les tâches liées.<br>
+    Quand un utilisateur change de nom → mettre à jour <code>userName</code> dans tous les commentaires.<br>
+    Utilisez des <strong>batch writes</strong> pour garantir l'atomicité.
+  </div>
+
+  <h2><span class="emoji">🔄</span> 10. Différences avec le schéma actuel</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Élément</th>
+        <th>Actuellement</th>
+        <th>Recommandé</th>
+        <th>Raison</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>deadline</code> / <code>dueDate</code></td>
+        <td><code>String</code></td>
+        <td><code>Timestamp</code></td>
+        <td>Tri et comparaisons natifs Firestore</td>
+      </tr>
+      <tr>
+        <td><code>createdAt</code> / <code>updatedAt</code></td>
+        <td>Absent</td>
+        <td><code>Timestamp</code></td>
+        <td>Traçabilité et tri chronologique</td>
+      </tr>
+      <tr>
+        <td><code>createdBy</code> dans tasks</td>
+        <td>Absent</td>
+        <td><code>String</code> (UID)</td>
+        <td>Savoir qui a créé la tâche (permissions)</td>
+      </tr>
+      <tr>
+        <td>Comments <code>.user</code></td>
+        <td><code>String</code> (nom)</td>
+        <td><code>userId</code> + <code>userName</code></td>
+        <td>Permet de lier au vrai utilisateur</td>
+      </tr>
+      <tr>
+        <td>Comments <code>.date</code></td>
+        <td><code>String</code></td>
+        <td><code>createdAt</code> (Timestamp)</td>
+        <td>Cohérence du schéma</td>
+      </tr>
+      <tr>
+        <td>Collection <code>notifications</code></td>
+        <td>Absente</td>
+        <td>Nouvelle collection</td>
+        <td>Support des notifications</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="emoji">🚀</span> 11. Évolutions futures prises en compte</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fonctionnalité future</th>
+        <th>Déjà préparé dans le schéma</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pièces jointes</td>
+        <td>Ajouter <code>attachments: array&lt;map&gt;</code> dans <code>tasks</code> avec
+          <code>{name, url, type, uploadedBy}</code></td>
+      </tr>
+      <tr>
+        <td>Notifications push</td>
+        <td>La collection <code>notifications</code> peut être alimentée par Cloud Functions et déclencher des push via
+          FCM</td>
+      </tr>
+      <tr>
+        <td>Historique d'activité</td>
+        <td>Ajouter une collection <code>activity_logs</code> avec
+          <code>{userId, action, targetType, targetId, details, createdAt}</code></td>
+      </tr>
+      <tr>
+        <td>Sous-tâches</td>
+        <td>Ajouter <code>subtasks: array&lt;map&gt;</code> dans <code>tasks</code> avec
+          <code>{id, title, isDone}</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p><strong>Conception Firestore — Gestion de Projets & Tâches</strong></p>
+    <p>Généré le 1 avril 2026 • Flutter + Firebase (Cloud Firestore)</p>
+  </div>
+
+</body>
+
+</html>

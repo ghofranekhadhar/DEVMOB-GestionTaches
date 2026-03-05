@@ -1,0 +1,62 @@
+Structure du dossier pour le volume DATA
+Le numéro de série du volume est 18AB-4AA8
+D:\2GL SEM2\COURSFLUTTER\DEVMOB-GESTIONTACHES\DEVMOB_GESTIONTACHES\LIB
+|   firebase_options.dart
+|   main.dart
+|   test_smtp.dart
+|   
++---models
+|       project.dart
+|       task_item.dart
+|       user_model.dart
+|       
++---providers
+|       auth_provider.dart
+|       project_provider.dart
+|       task_provider.dart
+|       
++---services
+|       auth_service.dart
+|       email_service.dart
+|       project_service.dart
+|       task_service.dart
+|       user_service.dart
+|       
++---utils
+|       app_colors.dart
+|       dummy_data.dart
+|       seed_data.dart
+|       
++---views
+|   |   dashboard_view.dart
+|   |   home_page.dart
+|   |   
+|   +---auth
+|   |       account_created_page.dart
+|   |       forgot_password_page.dart
+|   |       login_page.dart
+|   |       password_changed_page.dart
+|   |       register_page.dart
+|   |       set_new_password_page.dart
+|   |       verification_page.dart
+|   |       welcome_page.dart
+|   |       
+|   +---profile
+|   |       team_member_page.dart
+|   |       user_profile_page.dart
+|   |       
+|   +---project
+|   |       add_project_page.dart
+|   |       project_detail_page.dart
+|   |       project_list_page.dart
+|   |       
+|   \---task
+|           add_task_page.dart
+|           task_board_page.dart
+|           task_detail_page.dart
+|           
+\---widgets
+        app_logo.dart
+        project_card.dart
+        task_tile.dart
+        

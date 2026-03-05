@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "26143298053",
+    "project_id": "devmob-gestiontaches",
+    "storage_bucket": "devmob-gestiontaches.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26143298053:android:156bdbf01fc27da143826c",
+        "android_client_info": {
+          "package_name": "com.example.devmob_gestiontaches"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqqYWlqONhtzPR3zuO1s6qi5c455P4stc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

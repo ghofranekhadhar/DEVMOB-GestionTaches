@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function getRole() {
+      // Permet de lire le champ 'role' de l'utilisateur. S'il n'existe pas, on retourne null.
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      // On considère comme admin tout utilisateur ayant le role 'admin'
+      return getRole() == 'admin';
+    }
+
+    // ────────────────────────────────────────────────
+    // USERS
+    // ────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Permettre aux admins ou à l'utilisateur lui-même de se mettre à jour
+      allow update, delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // ────────────────────────────────────────────────
+    // PROJECTS
+    // ────────────────────────────────────────────────
+    match /projects/{projectId} {
+      // Un membre ne peut lire que s'il fait partie de "members" ou s'il est admin
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid in resource.data.members);
+      
+      // Seul l'admin peut créer, mettre à jour, et supprimer
+      allow create, update, delete: if request.auth != null && isAdmin();
+    }
+
+    // ────────────────────────────────────────────────
+    // TASKS
+    // ────────────────────────────────────────────────
+    match /tasks/{taskId} {
+      // Lecture : admin, ou bien assignée à cet utilisateur spécifiquement
+      allow read: if request.auth != null && (isAdmin() || resource.data.get('assignedTo', '') == request.auth.uid);
+      
+      // Seul l'admin peut créer et supprimer
+      allow create, delete: if request.auth != null && isAdmin();
+
+      // Mise à jour : Admin peut tout modifier. 
+      // Un collaborateur ne peut le faire que si la tâche lui est assignée ET s'il ne modifie que le statut.
+      allow update: if request.auth != null && (
+        isAdmin() 
+        || (
+          resource.data.get('assignedTo', '') == request.auth.uid 
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        )
+      );
+    }
+  }
+}
