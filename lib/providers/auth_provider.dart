@@ -62,7 +62,7 @@ class AuthProvider with ChangeNotifier {
           'uid': user.uid,
           'email': user.email ?? email,
           'fullName': fullName,
-          'role': 'member', // Rôle forcé — jamais choisi par l'utilisateur
+          'role': 'collaborateur', // Rôle forcé — jamais choisi par l'utilisateur
           'avatar': '',
         });
       }

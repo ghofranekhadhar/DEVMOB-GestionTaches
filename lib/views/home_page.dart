@@ -51,7 +51,6 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       debugPrint('Erreur updateTaskStatus: $e');
     }
-    setState(() => _showTaskDetail = false);
   }
 
 
@@ -142,12 +141,13 @@ class _HomePageState extends State<HomePage> {
         onBack: () => setState(() => _showProjectDetail = false),
         onTaskClick: (t) => setState(() { _selectedTask = t; _showTaskDetail = true; }),
         onUpdateTaskStatus: _updateTaskStatus,
+        onMemberClick: (m) => _openMemberModal(m, pTasks, [_selectedProject!]),
       );
     }
 
     return Scaffold(
       backgroundColor: AppColors.figmaBg,
-      appBar: _buildAppBar(user, allUsers, projects, allTasks),
+      appBar: _buildAppBar(user, allUsers, projects, allTasks, _computeReminders(myTasks)),
       body: _buildCurrentBody(user, projects, myTasks, allTasks, allUsers, todoCount, progCount, compCount, urgentCount, perc),
       floatingActionButton: user.isAdmin ? Padding(
         padding: const EdgeInsets.only(top: 20),
@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(UserModel currentUser, List<UserModel> allUsers, List<Project> projects, List<TaskItem> allTasks) {
+  PreferredSizeWidget _buildAppBar(UserModel currentUser, List<UserModel> allUsers, List<Project> projects, List<TaskItem> allTasks, List<Map<String, dynamic>> reminders) {
     final String mName = currentUser.name;
     final nameParts = mName.trim().split(RegExp(r'\s+'));
     final String initials = nameParts.take(2).map((e) => e.isNotEmpty ? e[0] : '').join().toUpperCase();
@@ -198,31 +198,69 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             children: [
               // Bell notification
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 38, height: 38,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.gray100),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4)],
+              PopupMenuButton<Map<String, dynamic>>(
+                offset: const Offset(0, 48),
+                tooltip: 'Notifications',
+                onSelected: (rem) {
+                  if (rem['task'] != null) {
+                    setState(() { _selectedTask = rem['task'] as TaskItem; _showTaskDetail = true; });
+                  }
+                },
+                itemBuilder: (ctx) {
+                  if (reminders.isEmpty) {
+                    return [
+                      PopupMenuItem(
+                        enabled: false,
+                        child: Text("No new notifications", style: GoogleFonts.outfit(color: AppColors.gray500, fontSize: 13)),
+                      )
+                    ];
+                  }
+                  return reminders.map((rem) => PopupMenuItem<Map<String, dynamic>>(
+                    value: rem,
+                    child: Row(
+                      children: [
+                        Container(width: 8, height: 8, decoration: BoxDecoration(color: rem['color'] as Color, shape: BoxShape.circle)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(rem['title'] as String, style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.gray800)),
+                              Text(rem['message'] as String, style: GoogleFonts.outfit(fontSize: 10, color: AppColors.gray500)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Center(child: Icon(LucideIcons.bell, color: AppColors.gray600, size: 17)),
-                  ),
-                  Positioned(
-                    right: 7, top: 7,
-                    child: Container(
-                      width: 9, height: 9,
+                  )).toList();
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 38, height: 38,
                       decoration: BoxDecoration(
-                        color: AppColors.figmaUrgent,
+                        color: Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
+                        border: Border.all(color: AppColors.gray100),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4)],
                       ),
+                      child: const Center(child: Icon(LucideIcons.bell, color: AppColors.gray600, size: 17)),
                     ),
-                  ),
-                ],
+                    if (reminders.isNotEmpty)
+                      Positioned(
+                        right: 7, top: 7,
+                        child: Container(
+                          width: 9, height: 9,
+                          decoration: BoxDecoration(
+                            color: AppColors.figmaUrgent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(width: 10),
               // User avatar with logout popup
@@ -413,5 +451,47 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  List<Map<String, dynamic>> _computeReminders(List<TaskItem> myTasks) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final List<Map<String, dynamic>> reminders = [];
+
+    for (final task in myTasks) {
+      final isDone = task.status.toLowerCase().contains('done') || task.status.toLowerCase().contains('terminé');
+      if (isDone) continue;
+
+      if (task.dueDate.isNotEmpty) {
+        try {
+          final deadline = DateFormat('yyyy-MM-dd').parse(task.dueDate);
+          final deadlineDay = DateTime(deadline.year, deadline.month, deadline.day);
+
+          if (deadlineDay.isBefore(today)) {
+            final daysOverdue = today.difference(deadlineDay).inDays;
+            reminders.add({
+              'task': task,
+              'title': 'Overdue',
+              'message': '${task.title} is overdue by $daysOverdue day${daysOverdue != 1 ? "s" : ""}',
+              'color': AppColors.figmaUrgent,
+            });
+            continue;
+          }
+
+          final daysUntil = deadlineDay.difference(today).inDays;
+          if (daysUntil <= 3 && (task.priority == 'urgent' || task.priority == 'high')) {
+            reminders.add({
+              'task': task,
+              'title': 'Due Soon',
+              'message': daysUntil == 0
+                  ? '${task.title} is due today'
+                  : '${task.title} is due in $daysUntil day${daysUntil != 1 ? "s" : ""}',
+              'color': Colors.orange,
+            });
+          }
+        } catch (_) {}
+      }
+    }
+    return reminders;
   }
 }

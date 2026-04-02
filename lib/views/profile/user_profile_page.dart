@@ -99,84 +99,93 @@ class UserProfilePage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: AppColors.accent.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppColors.accent.withOpacity(0.2),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: AppColors.accent.withOpacity(0.2),
+                                  ),
                                 ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  mInitials,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.accent,
+                                child: Center(
+                                  child: Text(
+                                    mInitials,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.accent,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  mName,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.gray800,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.accent.withOpacity(
-                                          0.1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        'Collaborator',
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.accent,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Icon(
-                                      LucideIcons.mapPin,
-                                      size: 10,
-                                      color: AppColors.gray400,
-                                    ),
-                                    const SizedBox(width: 4),
                                     Text(
-                                      'Remote',
+                                      mName,
                                       style: GoogleFonts.outfit(
-                                        fontSize: 10,
-                                        color: AppColors.gray500,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.gray800,
                                       ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.accent.withOpacity(
+                                              0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            member.role.isNotEmpty
+                                                ? '${member.role[0].toUpperCase()}${member.role.substring(1).toLowerCase()}'
+                                                : 'Collaborateurr',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.accent,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          LucideIcons.mapPin,
+                                          size: 10,
+                                          color: AppColors.gray400,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Tunisie',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 10,
+                                            color: AppColors.gray500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 16),
                         GestureDetector(
                           onTap: onClose,
                           child: Container(
@@ -579,11 +588,14 @@ class UserProfilePage extends StatelessWidget {
                                         const SizedBox(height: 4),
                                         Row(
                                           children: [
-                                            Text(
-                                              t.projectName,
-                                              style: GoogleFonts.outfit(
-                                                fontSize: 9,
-                                                color: AppColors.gray400,
+                                            Flexible(
+                                              child: Text(
+                                                t.projectName,
+                                                style: GoogleFonts.outfit(
+                                                  fontSize: 9,
+                                                  color: AppColors.gray400,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                             const SizedBox(width: 8),
