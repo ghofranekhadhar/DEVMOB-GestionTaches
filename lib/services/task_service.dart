@@ -111,5 +111,14 @@ class TaskService {
       throw Exception('Erreur lors de la suppression de la tâche: $e');
     }
   }
+  Future<void> addCommentToTask(String taskId, TaskComment comment) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).update({
+        'comments': FieldValue.arrayUnion([comment.toMap()]),
+      });
+    } catch (e) {
+      throw Exception('Erreur lors de l\'ajout du commentaire: $e');
+    }
+  }
 }
 

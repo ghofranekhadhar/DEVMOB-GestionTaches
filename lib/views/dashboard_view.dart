@@ -392,166 +392,184 @@ class DashboardView extends StatelessWidget {
           color: AppColors.figmaHeroStart.withValues(alpha: 0.1),
         ),
       ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 1500),
+        curve: Curves.easeOutCubic,
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        builder: (context, animValue, _) {
+          final double totalChartValue = (completedCount == 0 && pendingCount == 0 && urgentCount == 0)
+              ? 1.0
+              : (completedCount + pendingCount + urgentCount).toDouble();
+
+          return Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      LucideIcons.rocket,
-                      size: 14,
-                      color: AppColors.figmaHeroStart,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        'My Progress',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.gray700,
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          LucideIcons.rocket,
+                          size: 14,
+                          color: AppColors.figmaHeroStart,
                         ),
                       ),
-                      Text(
-                        period == "Day"
-                            ? "Today's tasks"
-                            : period == "Week"
-                            ? "This week"
-                            : "This month",
-                        style: GoogleFonts.outfit(
-                          fontSize: 8,
-                          color: AppColors.gray400,
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'My Progress',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.gray700,
+                            ),
+                          ),
+                          Text(
+                            period == "Day"
+                                ? "Today's tasks"
+                                : period == "Week"
+                                ? "This week"
+                                : "This month",
+                            style: GoogleFonts.outfit(
+                              fontSize: 8,
+                              color: AppColors.gray400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(9999),
+                    ),
+                    child: Text(
+                      '${(percentage * animValue).toInt()}%',
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.figmaHeroStart,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 72,
+                    height: 72,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        PieChart(
+                          PieChartData(
+                            sectionsSpace: 4,
+                            centerSpaceRadius: 28,
+                            startDegreeOffset: -90,
+                            sections: [
+                              PieChartSectionData(
+                                color: AppColors.figmaHeroStart,
+                                value: (completedCount == 0 &&
+                                        pendingCount == 0 &&
+                                        urgentCount == 0
+                                    ? 0.0
+                                    : completedCount.toDouble()) * animValue,
+                                title: '',
+                                radius: 8,
+                              ),
+                              if (urgentCount > 0)
+                                PieChartSectionData(
+                                  color: AppColors.figmaUrgent,
+                                  value: urgentCount.toDouble() * animValue,
+                                  title: '',
+                                  radius: 8,
+                                ),
+                              if (pendingCount > 0)
+                                PieChartSectionData(
+                                  color: AppColors.gray100,
+                                  value: pendingCount.toDouble() * animValue,
+                                  title: '',
+                                  radius: 8,
+                                ),
+                              if (completedCount == 0 &&
+                                  pendingCount == 0 &&
+                                  urgentCount == 0)
+                                PieChartSectionData(
+                                  color: AppColors.figmaHeroStart,
+                                  value: 1.0 * animValue,
+                                  title: '',
+                                  radius: 8,
+                                ),
+                              if (animValue < 1.0)
+                                PieChartSectionData(
+                                  color: Colors.transparent,
+                                  value: totalChartValue * (1.0 - animValue),
+                                  title: '',
+                                  radius: 8,
+                                ),
+                            ],
+                          ),
+                          swapAnimationDuration: Duration.zero,
                         ),
+                        Center(
+                          child: Text(
+                            '${(percentage * animValue).toInt()}%',
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.figmaHeroStart,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 70),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildProgressStatRow(
+                        'Completed',
+                        completedCount,
+                        LucideIcons.checkCircle2,
+                        AppColors.gray800,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildProgressStatRow(
+                        'Remaining',
+                        pendingCount,
+                        LucideIcons.clock,
+                        AppColors.gray400,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildProgressStatRow(
+                        'Urgent',
+                        urgentCount,
+                        LucideIcons.flag,
+                        AppColors.figmaUrgent,
                       ),
                     ],
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(9999),
-                ),
-                child: Text(
-                  '$percentage%',
-                  style: GoogleFonts.outfit(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.figmaHeroStart,
-                  ),
-                ),
-              ),
             ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 72,
-                height: 72,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    PieChart(
-                      PieChartData(
-                        sectionsSpace: 4,
-                        centerSpaceRadius: 28,
-                        startDegreeOffset: -90,
-                        sections: [
-                          PieChartSectionData(
-                            color: AppColors.figmaHeroStart,
-                            value:
-                                completedCount == 0 &&
-                                    pendingCount == 0 &&
-                                    urgentCount == 0
-                                ? 0
-                                : completedCount.toDouble(),
-                            title: '',
-                            radius: 8,
-                          ),
-                          if (urgentCount > 0)
-                            PieChartSectionData(
-                              color: AppColors.figmaUrgent,
-                              value: urgentCount.toDouble(),
-                              title: '',
-                              radius: 8,
-                            ),
-                          if (pendingCount > 0)
-                            PieChartSectionData(
-                              color: AppColors.gray100,
-                              value: pendingCount.toDouble(),
-                              title: '',
-                              radius: 8,
-                            ),
-                          if (completedCount == 0 &&
-                              pendingCount == 0 &&
-                              urgentCount == 0)
-                            PieChartSectionData(
-                              color: AppColors.figmaHeroStart, // 100% progress color
-                              value: 1,
-                              title: '',
-                              radius: 8,
-                            ),
-                        ],
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        '$percentage%',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.figmaHeroStart,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 180), // Added more space
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildProgressStatRow(
-                    'Completed',
-                    completedCount,
-                    LucideIcons.checkCircle2,
-                    AppColors.gray800,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildProgressStatRow(
-                    'Remaining',
-                    pendingCount,
-                    LucideIcons.clock,
-                    AppColors.gray400,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildProgressStatRow(
-                    'Urgent',
-                    urgentCount,
-                    LucideIcons.flag,
-                    AppColors.figmaUrgent,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -651,7 +669,7 @@ class DashboardView extends StatelessWidget {
             _buildGraphCard(
               'To Do',
               todoTasks.length,
-              AppColors.figmaHeroStart,
+              Colors.blue.shade300,
               max(
                 1.0,
                 [
@@ -665,7 +683,7 @@ class DashboardView extends StatelessWidget {
             _buildGraphCard(
               'In Progress',
               inProgressTasks.length,
-              AppColors.figmaInProgress,
+              Colors.blue.shade500,
               max(
                 1.0,
                 [
@@ -679,7 +697,7 @@ class DashboardView extends StatelessWidget {
             _buildGraphCard(
               'Done',
               completedTasks.length,
-              AppColors.figmaDone,
+              Colors.blue.shade700,
               max(
                 1.0,
                 [
@@ -771,7 +789,9 @@ class DashboardView extends StatelessWidget {
                       barRods: [
                         BarChartRodData(
                           toY: count == 0 ? maxCount * 0.08 : count.toDouble(),
-                          color: count == 0 ? color.withValues(alpha: 0.3) : color,
+                          color: count == 0
+                              ? color.withValues(alpha: 0.3)
+                              : color,
                           width: 24,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -906,10 +926,10 @@ class DashboardView extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final List<Map<String, String>> reminders = [];
+    final List<Map<String, dynamic>> reminders = [];
 
     for (final task in myTasks) {
-      final isDone = task.status.toLowerCase().contains('done');
+      final isDone = task.status.toLowerCase().contains('done') || task.status.toLowerCase().contains('terminé');
       if (isDone) continue;
 
       // Check overdue
@@ -925,6 +945,7 @@ class DashboardView extends StatelessWidget {
           if (deadlineDay.isBefore(today)) {
             final daysOverdue = today.difference(deadlineDay).inDays;
             reminders.add({
+              'task': task,
               'title': task.title,
               'message':
                   'Overdue by $daysOverdue day${daysOverdue != 1 ? "s" : ""}',
@@ -937,6 +958,7 @@ class DashboardView extends StatelessWidget {
           if (daysUntil <= 3 &&
               (task.priority == 'urgent' || task.priority == 'high')) {
             reminders.add({
+              'task': task,
               'title': task.title,
               'message': daysUntil == 0
                   ? 'Due today - ${task.priority} task'
@@ -1004,7 +1026,7 @@ class DashboardView extends StatelessWidget {
               .map(
                 (r) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: _buildNotificationItem(r['title']!, r['message']!),
+                  child: _buildNotificationItem(r['task'] as TaskItem, r['title'] as String, r['message'] as String),
                 ),
               ),
         ],
@@ -1012,13 +1034,15 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationItem(String title, String subtitle) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
+  Widget _buildNotificationItem(TaskItem task, String title, String subtitle) {
+    return GestureDetector(
+      onTap: () => onTaskClick(task),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1063,7 +1087,7 @@ class DashboardView extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildTasksListCompact() {

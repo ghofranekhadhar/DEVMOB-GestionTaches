@@ -218,22 +218,26 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: Checkbox(
-                                    value: _keepLoggedIn,
-                                    onChanged: (value) => setState(() => _keepLoggedIn = value ?? false),
-                                    activeColor: const Color(0xFF5B7FFF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                                    side: const BorderSide(color: Color(0xFF5B7FFF), width: 2),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: Checkbox(
+                                      value: _keepLoggedIn,
+                                      onChanged: (value) => setState(() => _keepLoggedIn = value ?? false),
+                                      activeColor: const Color(0xFF5B7FFF),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                      side: const BorderSide(color: Color(0xFF5B7FFF), width: 2),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('Keep me logged in', style: TextStyle(fontSize: 14, color: Color(0xFF374151))),
-                              ],
+                                  const SizedBox(width: 8),
+                                  const Expanded(
+                                    child: Text('Keep me logged in', style: TextStyle(fontSize: 14, color: Color(0xFF374151))),
+                                  ),
+                                ],
+                              ),
                             ),
                             TextButton(
                               onPressed: () {

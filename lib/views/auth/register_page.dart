@@ -116,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 80),
+                        const SizedBox(height: 20),
 
                         // Title
                         const Text(
@@ -334,7 +334,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text('I agree with privacy policy', style: TextStyle(fontSize: 14, color: Color(0xFF374151))),
+                            const Expanded(
+                              child: Text('I agree with privacy policy', style: TextStyle(fontSize: 14, color: Color(0xFF374151))),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),

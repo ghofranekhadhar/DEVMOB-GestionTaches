@@ -12,7 +12,7 @@ class UserModel {
     this.displayName,
     this.fullName,
     this.photoUrl,
-    this.role = 'member',
+    this.role = 'collaborateur',
   });
 
   /// Nom affiché : priorité fullName (Firestore) > displayName (Auth) > partie avant l'@
@@ -29,7 +29,7 @@ class UserModel {
       displayName: user.displayName,
       fullName: null,
       photoUrl: user.photoURL,
-      role: 'member', // Toujours member depuis Auth seul
+      role: 'collaborateur', // Toujours collaborateur depuis Auth seul
     );
   }
 
@@ -42,7 +42,7 @@ class UserModel {
       displayName: data['displayName'] ?? data['name'],
       fullName: data['fullName'],
       photoUrl: data['photoUrl'] ?? data['photoURL'] ?? data['avatar'],
-      role: data['role'] ?? 'member',
+      role: (data['role'] == null || data['role'] == 'member') ? 'collaborateur' : data['role'],
     );
   }
 

@@ -18,6 +18,7 @@ class ProjectDetailPage extends StatefulWidget {
   final VoidCallback onBack;
   final Function(TaskItem) onTaskClick;
   final Function(String, String) onUpdateTaskStatus;
+  final Function(UserModel) onMemberClick;
 
   const ProjectDetailPage({
     super.key,
@@ -27,6 +28,7 @@ class ProjectDetailPage extends StatefulWidget {
     required this.onBack,
     required this.onTaskClick,
     required this.onUpdateTaskStatus,
+    required this.onMemberClick,
   });
 
   @override
@@ -657,93 +659,96 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         final mDone = mTasks.where((t) => t.status.toLowerCase().contains('done')).length;
         final mPct = mTasks.isEmpty ? 0 : ((mDone / mTasks.length) * 100).round();
         
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.gray100), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2))]),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  Container(
-                    width: 56, height: 56,
-                    decoration: BoxDecoration(color: const Color(0xFF5B7FFF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFF5B7FFF).withValues(alpha: 0.2))),
-                    child: Center(child: Text(name[0].toUpperCase(), style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF5B7FFF)))),
-                  ),
-                  if (mPct > 0 && mPct < 100)
-                    Positioned(
-                      top: -4, right: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(color: const Color(0xFF5B7FFF), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                        child: Text('$mPct%', style: GoogleFonts.outfit(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white)),
-                      ),
-                    ),
-                  if (mPct == 100 && mTasks.isNotEmpty)
-                    Positioned(
-                      top: -4, right: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(color: AppColors.emerald500, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                        child: const Icon(LucideIcons.checkCircle2, size: 10, color: Colors.white),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return GestureDetector(
+          onTap: () => widget.onMemberClick(m),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.gray100), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2))]),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
                   children: [
-                    Row(
-                      children: [
-                        Text(name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.gray800)),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(color: const Color(0xFF5B7FFF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(999)),
-                          child: Text('Member', style: GoogleFonts.outfit(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF5B7FFF))),
+                    Container(
+                      width: 56, height: 56,
+                      decoration: BoxDecoration(color: const Color(0xFF5B7FFF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFF5B7FFF).withValues(alpha: 0.2))),
+                      child: Center(child: Text(name[0].toUpperCase(), style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF5B7FFF)))),
+                    ),
+                    if (mPct > 0 && mPct < 100)
+                      Positioned(
+                        top: -4, right: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(color: const Color(0xFF5B7FFF), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                          child: Text('$mPct%', style: GoogleFonts.outfit(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white)),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(LucideIcons.mail, size: 9, color: AppColors.gray400),
-                        const SizedBox(width: 4),
-                        Text(m.email, style: GoogleFonts.outfit(fontSize: 9, color: AppColors.gray400)),
-                      ],
-                    ),
-                    if (mTasks.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      ),
+                    if (mPct == 100 && mTasks.isNotEmpty)
+                      Positioned(
+                        top: -4, right: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(color: AppColors.emerald500, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                          child: const Icon(LucideIcons.checkCircle2, size: 10, color: Colors.white),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('$mDone/${mTasks.length} tasks', style: GoogleFonts.outfit(fontSize: 7, color: AppColors.gray400)),
-                          Text('$mPct%', style: GoogleFonts.outfit(fontSize: 7, fontWeight: FontWeight.w600, color: const Color(0xFF5B7FFF))),
+                          Text(name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.gray800)),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(color: const Color(0xFF5B7FFF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(999)),
+                            child: Text(m.role.isNotEmpty ? '${m.role[0].toUpperCase()}${m.role.substring(1).toLowerCase()}' : 'Collaborateur', style: GoogleFonts.outfit(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF5B7FFF))),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Container(
-                        height: 6,
-                        decoration: BoxDecoration(color: AppColors.gray100, borderRadius: BorderRadius.circular(3)),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: mPct / 100,
-                          child: Container(decoration: BoxDecoration(color: const Color(0xFF5B7FFF), borderRadius: BorderRadius.circular(3))),
+                      Row(
+                        children: [
+                          const Icon(LucideIcons.mail, size: 9, color: AppColors.gray400),
+                          const SizedBox(width: 4),
+                          Text(m.email, style: GoogleFonts.outfit(fontSize: 9, color: AppColors.gray400)),
+                        ],
+                      ),
+                      if (mTasks.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('$mDone/${mTasks.length} tasks', style: GoogleFonts.outfit(fontSize: 7, color: AppColors.gray400)),
+                            Text('$mPct%', style: GoogleFonts.outfit(fontSize: 7, fontWeight: FontWeight.w600, color: const Color(0xFF5B7FFF))),
+                          ],
                         ),
-                      )
-                    ]
-                  ],
+                        const SizedBox(height: 4),
+                        Container(
+                          height: 6,
+                          decoration: BoxDecoration(color: AppColors.gray100, borderRadius: BorderRadius.circular(3)),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: mPct / 100,
+                            child: Container(decoration: BoxDecoration(color: const Color(0xFF5B7FFF), borderRadius: BorderRadius.circular(3))),
+                          ),
+                        )
+                      ]
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Icon(LucideIcons.chevronRight, size: 16, color: AppColors.gray300),
-              )
-            ],
+                const SizedBox(width: 8),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Icon(LucideIcons.chevronRight, size: 16, color: AppColors.gray300),
+                )
+              ],
+            ),
           ),
         );
       },

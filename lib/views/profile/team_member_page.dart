@@ -188,7 +188,7 @@ class _TeamMemberPageState extends State<TeamMemberPage> {
   Widget _buildMemberCard(UserModel member) {
     final name = member.name;
     final initials = name.trim().split(RegExp(r'\s+')).take(2).map((e) => e[0]).join().toUpperCase();
-    final isAdmin = member.isAdmin;
+
     final isCurrentUser = member.id == widget.currentUser.id;
     
     final mTasks = widget.allTasks.where((t) => t.assignedTo == member.id).toList();
@@ -228,18 +228,22 @@ class _TeamMemberPageState extends State<TeamMemberPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Text(name, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.gray800)),
-                          if (isCurrentUser) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                              decoration: BoxDecoration(color: AppColors.figmaTodo, borderRadius: BorderRadius.circular(999)),
-                              child: Text('You', style: GoogleFonts.outfit(fontSize: 7, fontWeight: FontWeight.w600, color: Colors.white)),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(name, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.gray800), overflow: TextOverflow.ellipsis),
                             ),
+                            if (isCurrentUser) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(color: AppColors.figmaTodo, borderRadius: BorderRadius.circular(999)),
+                                child: Text('You', style: GoogleFonts.outfit(fontSize: 7, fontWeight: FontWeight.w600, color: Colors.white)),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                       const Icon(LucideIcons.chevronRight, size: 14, color: AppColors.gray300),
                     ],
@@ -256,7 +260,10 @@ class _TeamMemberPageState extends State<TeamMemberPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(color: AppColors.figmaTodo.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(9999)),
-                    child: Text(isAdmin ? 'Admin' : 'Collaborator', style: GoogleFonts.outfit(fontSize: 8, fontWeight: FontWeight.w500, color: AppColors.figmaTodo)),
+                    child: Text(
+                      member.role.isNotEmpty ? '${member.role[0].toUpperCase()}${member.role.substring(1).toLowerCase()}' : 'Collaborateur',
+                      style: GoogleFonts.outfit(fontSize: 8, fontWeight: FontWeight.w500, color: AppColors.figmaTodo),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(

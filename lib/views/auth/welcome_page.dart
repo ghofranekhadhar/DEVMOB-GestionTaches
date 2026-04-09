@@ -87,20 +87,20 @@ class WelcomePage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
 
                     // App Name
                     const Text(
-                      'ƬΛSҠ.Y',
+                      'ᴛᴀsᴋ.ʏ',
                       style: TextStyle(
-                        fontSize: 36, // 4xl
+                        fontSize: 64, // 4xl
                         fontWeight: FontWeight.w800, // extrabold
                         letterSpacing: -0.5, // tracking-tight
                         color: Color(0xFF5B7FFF),
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
 
                     // Description
                     const Padding(
